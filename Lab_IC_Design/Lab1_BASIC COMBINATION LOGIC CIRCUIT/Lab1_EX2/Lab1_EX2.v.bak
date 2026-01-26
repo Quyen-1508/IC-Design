@@ -1,0 +1,9 @@
+module Lab1_EX2(SW,LEDG,LEDR);
+
+module half_adder_DF( a, b,  S, Cout);
+  input a,b;
+  output S,Cout;	
+
+  assign S = a ^ b;
+  assign Cout = a & b;
+endmodule

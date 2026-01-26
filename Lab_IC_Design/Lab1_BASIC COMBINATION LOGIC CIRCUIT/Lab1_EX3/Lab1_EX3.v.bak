@@ -1,0 +1,26 @@
+module full_adder_STRU(a,b,cin,Cum,Carry);
+	output Sum,Carry;
+	input A,B,Cin;
+	wire x,y,z;
+	xor g1(x,A,B);
+            xor g2(Sum,x,Cin);
+	and g3(y,x,Cin);
+	and g4(z,A,B);
+	or  g5(Carry,x,y);
+endmodule
+
+module full_adder_DTFL(input a, b, cin, output S, Cout);
+  assign S = a ^ b ^ cin;
+  assign Cout = (a & b) | (b & cin) | (a & cin);
+endmodule
+
+module full_adder_behavior(a,b,c,sum,carry);
+	output sum,carry;
+	input  a,b,c;
+    reg    sum,carry;
+	always @ (a,b,c) 
+	  begin
+		sum   <= a^ b^c;
+		carry <=(a&b) | (b&c) | (c&a);
+	  end
+endmodule

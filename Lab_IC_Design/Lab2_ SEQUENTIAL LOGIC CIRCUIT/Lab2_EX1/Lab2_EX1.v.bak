@@ -1,0 +1,18 @@
+module Lab2_EX1_top (
+    input  wire SW0,   // D input
+    input  wire SW1,   // Clock (tay)
+    input  wire KEY0,  // Reset (active-low)
+    output wire LED0
+);
+    wire async_reset = ~KEY0;
+    wire q;
+
+    dff_async U1 (
+        .clk(SW1),
+        .reset(async_reset),
+        .d(SW0),
+        .q(q)
+    );
+
+    assign LED0 = q;
+endmodule

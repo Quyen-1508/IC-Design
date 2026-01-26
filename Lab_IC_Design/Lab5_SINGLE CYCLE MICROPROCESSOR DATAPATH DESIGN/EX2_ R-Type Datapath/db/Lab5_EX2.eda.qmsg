@@ -1,0 +1,143 @@
+
+    }
+  }
+#ifndef VCS
+  vpi_release_handle(r);
+#endif
+  return 1;
+}
+
+
+/*
+ * Given a path, look the path name up using the PLI
+ * and return its 'value'.
+ */
+static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
+{
+  static int maxsize = -1;
+  int i, size, chunks;
+  vpiHandle r;
+  s_vpi_value value_s;
+
+  #ifdef QUESTA
+  if (!partsel) {
+    maxsize = uvm_hdl_max_width();
+    chunks = (maxsize-1)/32 + 1;
+    for(i=0;i<chunks-1; ++i) {
+      value[i].aval = 0;
+      value[i].bval = 0;
+    }
+  }
+  int result = 0;
+  result = uvm_hdl_get_vlog_partsel(path,value,flag);
+  if (result < 0)
+    return 0;
+  if (result == 1)
+    return 1;
+
+  if (!strncmp(path,"$root.",6))
+    r = vpi_handle_by_name(path+6, 0);
+  else
+  #endif
+  r = vpi_handle_by_name(path, 0);
+
+  if(r == 0)
+  {
+      vpi_printf((PLI_BYTE8*) "UVM_ERROR: get: unable to locate hdl path %s\n", path);
+      vpi_printf((PLI_BYTE8*) " Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
+    // Exiting is too harsh. Just return instead.
+    // tf_dofinish();
+    return 0;
+  }
+  else
+  {
+    if(maxsize == -1)
+        maxsize = uvm_hdl_max_width();
+
+    size = vpi_get(vpiSize, r);
+    if(size > maxsize)
+    {
+          vpi_printf((PLI_BYTE8*) "UVM_ERROR: uvm_reg : hdl path '%s' is %0d bits,\n",path,size);
+        vpi_printf((PLI_BYTE8*) " but the maximum size is %0d. You can increase the maximum\n",maxsize);
+        vpi_printf((PLI_BYTE8*) " via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
+      //tf_dofinish();
+#ifndef VCS
+      vpi_release_handle(r);
+#endif
+      return 0;
+    }
+    chunks = (size-1)/32 + 1;
+
+    value_s.format = vpiVectorVal;
+    vpi_get_value(r, &value_s);
+    /*dpi and vpi are reversed*/
+    for(i=0;i<chunks; ++i)
+    {
+      value[i].aval = value_s.value.vector[i].aval;
+      value[i].bval = value_s.value.vector[i].bval;
+    }
+  }
+  //vpi_printf("uvm_hdl_get_vlog(%s,%0x)\n",path,value[0].aval);
+#ifndef VCS
+  vpi_release_handle(r);
+#endif
+  return 1;
+}
+
+
+/*
+ * Given a path, look the path name up using the PLI,
+ * but don't set or get. Just check.
+ *
+ * Return 0 if NOT found.
+ * Return 1 if found.
+ */
+int uvm_hdl_check_path(char *path)
+{
+  vpiHandle r;
+
+  #ifdef QUESTA
+  if (!strncmp(path,"$root.",6)) {
+    r = vpi_handle_by_name(path+6, 0);
+  }
+  else
+  #endif
+  r = vpi_handle_by_name(path, 0);
+
+  if(r == 0)
+  // Check VHDL for Questa
+  #ifdef QUESTA
+      if(uvm_is_vhdl_path(path)) {
+    vpi_printf((PLI_BYTE8*)"VHDL path found\n");
+        return 1;
+  }
+      else
+  #endif
+      return 0;
+  else
+    return 1;
+}
+
+
+/*
+ * Given a path, look the path name up using the PLI
+ * or the FLI, and return its 'value'.
+ */
+int uvm_hdl_read(char *path, p_vpi_vecval value)
+{
+#ifndef QUESTA
+    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+#endif
+#ifdef QUESTA
+  if (uvm_is_vhdl_path(path)) {
+    return uvm_register_get_vhdl(path, value);
+  } else {
+    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+  }
+
+#endif
+}
+
+/*
+ * Given a path, look the path name up using the PLI
+ * or th

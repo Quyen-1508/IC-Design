@@ -1,0 +1,20 @@
+module full_adder(
+    input  a,
+    input  b,
+    input  cin,
+    output sum,
+    output cout
+);
+    wire p, g, c1;
+
+    // Propagate & Generate
+    xor(p, a, b);
+    and(g, a, b);
+
+    // Sum
+    xor(sum, p, cin);
+
+    // Carry-out
+    and(c1, p, cin);
+    or(cout, g, c1);
+endmodule

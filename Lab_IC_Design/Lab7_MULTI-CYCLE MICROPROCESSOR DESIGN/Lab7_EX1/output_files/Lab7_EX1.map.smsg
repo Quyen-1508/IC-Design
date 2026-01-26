@@ -1,0 +1,2 @@
+Warning (10268): Verilog HDL information at Datapath_Multi_cycle_Processor.v(125): always construct contains both blocking and non-blocking assignments File: E:/desktop/DIGITAL SYSTEM/Lab/Lab7_EX1/Datapath_Multi_cycle_Processor.v Line: 125
+Warning (10273): Verilog HDL warning at Datapath_Multi_cycle_Processor.v(725): extended using "x" or "z" File: E:/desktop/DIGITAL SYSTEM/Lab/Lab7_EX1/Datapath_Multi_cycle_Processor.v Line: 725
